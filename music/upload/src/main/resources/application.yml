@@ -1,0 +1,33 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: upload-service
+  servlet:
+    multipart:
+      max-file-size: 50MB # 限制文件上传的大小
+# Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/
+  instance:
+    lease-renewal-interval-in-seconds: 5 # 每隔5秒发送一次心跳
+    lease-expiration-duration-in-seconds: 10 # 10秒不发送就过期
+
+# fastDFS
+fdfs:
+  so-timeout: 5000 # 超时时间
+  connect-timeout: 2000 # 连接超时时间
+  thumb-image: # 缩略图
+    width: 150
+    height: 150
+  tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
+    123.207.87.254:22122
+
+# customize properties start
+upload:
+    local-path: G:\vinspier-project\upload\
+    server-path: source.vinspier.com/
+# customize properties end
