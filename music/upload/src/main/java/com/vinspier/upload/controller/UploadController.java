@@ -1,6 +1,7 @@
 package com.vinspier.upload.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.vinspier.upload.model.BaseResult;
 import com.vinspier.upload.service.UploadService;
 import com.vinspier.upload.util.ResultGenerator;
@@ -38,9 +39,9 @@ public class UploadController {
      */
     @PostMapping("image")
     @ResponseBody
-    public BaseResult uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+    public String uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
         String url = this.uploadService.uploadImage(file);
-        return ResultGenerator.genSuccess(url);
+        return JSONObject.toJSONString(ResultGenerator.genSuccess(url));
     }
 
     /**
@@ -51,9 +52,9 @@ public class UploadController {
      */
     @PostMapping("audio")
     @ResponseBody
-    public BaseResult uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
+    public String  uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
         String url = this.uploadService.uploadAudio(file);
-        return ResultGenerator.genSuccess(url);
+        return JSONObject.toJSONString(ResultGenerator.genSuccess(url));
     }
 
 }

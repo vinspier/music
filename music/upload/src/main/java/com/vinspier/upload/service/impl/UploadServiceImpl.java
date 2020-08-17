@@ -3,6 +3,9 @@ package com.vinspier.upload.service.impl;
 import com.github.tobato.fastdfs.domain.StorePath;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import com.vinspier.upload.config.UploadProperties;
+import com.vinspier.upload.enums.ContentType;
+import com.vinspier.upload.enums.ResultCode;
+import com.vinspier.upload.exception.CustomizeException;
 import com.vinspier.upload.service.UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +30,7 @@ public class UploadServiceImpl implements UploadService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadService.class);
 
-    private static final String IMAGE_CONTENT_TYPE = "image/";
     private static final List<String> IMAGINE_TYPES = Arrays.asList("image/jpeg", "image/gif","image/png","image/jpg");
-    private static final String AUDIO_CONTENT_TYPE = "audio/";
     private static final List<String> AUDIO_TYPES = Arrays.asList("audio/mp3","audio/wav");
 
     @Autowired
@@ -39,13 +40,9 @@ public class UploadServiceImpl implements UploadService {
     private UploadProperties uploadProperties;
 
     @Override
-    public String upload(MultipartFile file) throws IOException{
+    public String upload(MultipartFile file){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String validateResult = validateFile(file,IMAGE_CONTENT_TYPE,IMAGINE_TYPES);
-        if (StringUtils.hasText(validateResult)){
-            return validateResult;
-        }
-        // ToDo 定义全局报错返回
+        validateFile(file, ContentType.IMAGE.getContentType(),IMAGINE_TYPES);
         try {
             File uploadFile = new File(uploadProperties.getLocalPath() + dateFormat.format(new Date()) + "\\" + file.getOriginalFilename());
             if (!uploadFile.getParentFile().exists()){
@@ -58,39 +55,43 @@ public class UploadServiceImpl implements UploadService {
             return uploadProperties.getLocalPath() + "\\" + file.getOriginalFilename();
         } catch (IOException e) {
             LOGGER.info("服务器内部错误：{}", file.getOriginalFilename());
-            e.printStackTrace();
-            return "文件写入磁盘错误";
+            throw new CustomizeException(ResultCode.FILE_WRITE_ERROR);
         }
     }
 
     @Override
-    public String uploadImage(MultipartFile file) throws IOException {
-        String validateResult = validateFile(file,IMAGE_CONTENT_TYPE,IMAGINE_TYPES);
-        if (StringUtils.hasText(validateResult)){
-            return validateResult;
-        }
+    public String uploadImage(MultipartFile file){
+        validateFile(file,ContentType.IMAGE.getContentType(),IMAGINE_TYPES);
         String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        StorePath storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+        StorePath storePath;
+        try {
+            storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+        } catch (IOException e) {
+            LOGGER.info("文件上传至服务器失败：{}", file.getOriginalFilename());
+            throw new CustomizeException(ResultCode.UPLOAD_FAILED);
+        }
         // 生成url地址，返回
         return uploadProperties.getServerPath() + storePath.getFullPath();
     }
 
     @Override
-    public String uploadAudio(MultipartFile file) throws IOException {
-        String validateResult = validateFile(file,AUDIO_CONTENT_TYPE,AUDIO_TYPES);
-        if (StringUtils.hasText(validateResult)){
-            return validateResult;
+    public String uploadAudio(MultipartFile file){
+        validateFile(file,ContentType.AUDIO.getContentType(),AUDIO_TYPES);
+        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        StorePath storePath;
+        try {
+            storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+        } catch (IOException e) {
+            LOGGER.info("文件上传至服务器失败：{}", file.getOriginalFilename());
+            throw new CustomizeException(ResultCode.UPLOAD_FAILED);
         }
-
-        return null;
+        // 生成url地址，返回
+        return uploadProperties.getServerPath() + storePath.getFullPath();
     }
 
     @Override
     public String uploadFastThumb(MultipartFile file) throws IOException{
-        String validateResult = validateFile(file,IMAGE_CONTENT_TYPE,IMAGINE_TYPES);
-        if (StringUtils.hasText(validateResult)){
-            return validateResult;
-        }
+        validateFile(file,ContentType.IMAGE.getContentType(),IMAGINE_TYPES);
         String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         StorePath storePath = this.storageClient.uploadImageAndCrtThumbImage(file.getInputStream(), file.getSize(), ext, null);
         return uploadProperties.getServerPath() + storePath.getFullPath();
@@ -99,22 +100,20 @@ public class UploadServiceImpl implements UploadService {
     /**
      * 验证文件格式
      * */
-    // ToDo 校验不合格 抛出全局错误
-    private String validateFile(MultipartFile file,String validContentType,List<String> fileExtensions) throws IOException{
+    private void validateFile(MultipartFile file,String validContentType,List<String> fileExtensions){
         String originalFilename = file.getOriginalFilename();
         // 校验文件的类型
         String contentType = file.getContentType();
         if (!contentType.startsWith(validContentType)){
             // 文件类型不合法，直接返回null
             LOGGER.info("文件类型不合法: current file content type is [{}] , should be [{}]", originalFilename,fileExtensions.toString());
-            return "请上传合法格式文件";
+            throw new CustomizeException(ResultCode.FILE_INVALID);
         }
         // 校验文件的内容
         // BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
         if (file.getSize() <= 0){
             LOGGER.info("文件内容不合法：file content is not allowed empty");
-            return "文件内容不合法：file content is not allowed empty";
+            throw new CustomizeException(ResultCode.FILE_EMPTY);
         }
-        return null;
     }
 }
