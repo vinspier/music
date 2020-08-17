@@ -29,5 +29,5 @@ fdfs:
 # customize properties start
 upload:
     local-path: G:\vinspier-project\upload\
-    server-path: source.vinspier.com/
+    server-path: http://source.vinspier.com/
 # customize properties end
