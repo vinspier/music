@@ -43,4 +43,17 @@ public class UploadController {
         return ResultGenerator.genSuccess(url);
     }
 
+    /**
+     * 音频上传
+     * 单文件
+     * @param file
+     * @return
+     */
+    @PostMapping("audio")
+    @ResponseBody
+    public BaseResult uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
+        String url = this.uploadService.uploadAudio(file);
+        return ResultGenerator.genSuccess(url);
+    }
+
 }

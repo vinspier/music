@@ -39,6 +39,7 @@
         <music.latest.version>1.0.0-SNAPSHOT</music.latest.version>
         <fastDFS.client.version>1.26.1-RELEASE</fastDFS.client.version>
         <lombok.version>1.16.22</lombok.version>
+        <jaxb-api.version>2.4.0-b180725.0427</jaxb-api.version>
     </properties>
 
     <dependencyManagement>
@@ -65,6 +66,13 @@
                 <groupId>com.github.tobato</groupId>
                 <artifactId>fastdfs-client</artifactId>
                 <version>${fastDFS.client.version}</version>
+            </dependency>
+
+            <!-- jaxb-api -->
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jaxb-api.version}</version>
             </dependency>
 
             <!--test-->

@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,10 @@ public class UploadServiceImpl implements UploadService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadService.class);
 
-    private static final List<String> CONTENT_TYPES = Arrays.asList("image/jpeg", "image/gif","image/png","image/jpg");
+    private static final String IMAGE_CONTENT_TYPE = "image/";
+    private static final List<String> IMAGINE_TYPES = Arrays.asList("image/jpeg", "image/gif","image/png","image/jpg");
+    private static final String AUDIO_CONTENT_TYPE = "audio/";
+    private static final List<String> AUDIO_TYPES = Arrays.asList("audio/mp3","audio/wav");
 
     @Autowired
     private FastFileStorageClient storageClient;
@@ -37,7 +41,7 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public String upload(MultipartFile file) throws IOException{
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String validateResult = validateFile(file);
+        String validateResult = validateFile(file,IMAGE_CONTENT_TYPE,IMAGINE_TYPES);
         if (StringUtils.hasText(validateResult)){
             return validateResult;
         }
@@ -61,7 +65,7 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public String uploadImage(MultipartFile file) throws IOException {
-        String validateResult = validateFile(file);
+        String validateResult = validateFile(file,IMAGE_CONTENT_TYPE,IMAGINE_TYPES);
         if (StringUtils.hasText(validateResult)){
             return validateResult;
         }
@@ -72,8 +76,18 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
+    public String uploadAudio(MultipartFile file) throws IOException {
+        String validateResult = validateFile(file,AUDIO_CONTENT_TYPE,AUDIO_TYPES);
+        if (StringUtils.hasText(validateResult)){
+            return validateResult;
+        }
+
+        return null;
+    }
+
+    @Override
     public String uploadFastThumb(MultipartFile file) throws IOException{
-        String validateResult = validateFile(file);
+        String validateResult = validateFile(file,IMAGE_CONTENT_TYPE,IMAGINE_TYPES);
         if (StringUtils.hasText(validateResult)){
             return validateResult;
         }
@@ -83,22 +97,23 @@ public class UploadServiceImpl implements UploadService {
     }
 
     /**
-     * 验证文件
+     * 验证文件格式
      * */
-    private String validateFile(MultipartFile file) throws IOException{
+    // ToDo 校验不合格 抛出全局错误
+    private String validateFile(MultipartFile file,String validContentType,List<String> fileExtensions) throws IOException{
         String originalFilename = file.getOriginalFilename();
         // 校验文件的类型
         String contentType = file.getContentType();
-        if (!CONTENT_TYPES.contains(contentType)){
+        if (!contentType.startsWith(validContentType)){
             // 文件类型不合法，直接返回null
-            LOGGER.info("文件类型不合法：{image/jpeg,image/jpg,image/png,image/gif}", originalFilename);
-            return "文件类型不合法";
+            LOGGER.info("文件类型不合法: current file content type is [{}] , should be [{}]", originalFilename,fileExtensions.toString());
+            return "请上传合法格式文件";
         }
         // 校验文件的内容
-        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-        if (bufferedImage == null){
-            LOGGER.info("文件内容不合法：{image/jpeg,image/jpg,image/png,image/gif}", originalFilename);
-            return null;
+        // BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+        if (file.getSize() <= 0){
+            LOGGER.info("文件内容不合法：file content is not allowed empty");
+            return "文件内容不合法：file content is not allowed empty";
         }
         return null;
     }

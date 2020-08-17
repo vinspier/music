@@ -6,6 +6,6 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8080/eureka/
+      defaultZone: http://localhost:9000/eureka/
     register-with-eureka: false # 是否注册到服务中心(本身就是) 集群搭建时开始
     fetch-registry: false # 是否从注册中心中拉取服务

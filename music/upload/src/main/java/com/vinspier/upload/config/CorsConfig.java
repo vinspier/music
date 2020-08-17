@@ -26,7 +26,7 @@ public class CorsConfig {
         //1) 允许的域,不要写*，否则cookie就无法使用了
         // 添加上传文件的域名地址
         // config.addAllowedOrigin("http://manage.vinspier.com");
-        config.addAllowedOrigin("http://manage.vinspier.com");
+        config.addAllowedOrigin("*");
         //3) 允许的请求方式
         config.addAllowedMethod("OPTIONS");
         config.addAllowedMethod("POST");

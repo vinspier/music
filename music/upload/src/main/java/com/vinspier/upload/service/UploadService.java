@@ -18,6 +18,12 @@ public interface UploadService {
     String uploadImage(MultipartFile file) throws IOException;
 
     /**
+     * 上传音频文件
+     * 返回全路径
+     * */
+    String uploadAudio(MultipartFile file) throws IOException;
+
+    /**
      * fastDFS客户端上传到fastFDS服务器
      * 返回全路径 生成缩略图
      * */
