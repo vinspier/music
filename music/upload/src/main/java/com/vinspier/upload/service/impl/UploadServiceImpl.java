@@ -19,6 +19,7 @@ import javax.sound.sampled.AudioInputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -95,6 +96,12 @@ public class UploadServiceImpl implements UploadService {
         String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         StorePath storePath = this.storageClient.uploadImageAndCrtThumbImage(file.getInputStream(), file.getSize(), ext, null);
         return uploadProperties.getServerPath() + storePath.getFullPath();
+    }
+
+    @Override
+    public byte[] download(String group, String path) {
+        byte[] fileByte = this.storageClient.downloadFile(group,path,(InputStream is) -> is.readAllBytes());
+        return fileByte;
     }
 
     /**

@@ -4,16 +4,16 @@ package com.vinspier.upload.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.vinspier.upload.model.BaseResult;
 import com.vinspier.upload.service.UploadService;
+import com.vinspier.upload.util.FileUtil;
 import com.vinspier.upload.util.ResultGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * 文件上传类
@@ -55,6 +55,16 @@ public class UploadController {
     public String  uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
         String url = this.uploadService.uploadAudio(file);
         return JSONObject.toJSONString(ResultGenerator.genSuccess(url));
+    }
+
+    /**
+     * 下载文件
+     * */
+    @GetMapping("download")
+    @ResponseBody
+    public void download(String group, String path, HttpServletResponse response){
+        byte[] fileByte = uploadService.download(group,path);
+        FileUtil.downloadFileByEncode_gb2312(response,fileByte,"test-fileName" + UUID.randomUUID().toString());
     }
 
 }

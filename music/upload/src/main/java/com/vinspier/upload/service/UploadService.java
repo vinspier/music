@@ -29,4 +29,9 @@ public interface UploadService {
      * */
     String uploadFastThumb(MultipartFile file) throws IOException;
 
+    /**
+     * 下载文件
+     * */
+    byte[] download(String group,String path);
+
 }
