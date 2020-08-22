@@ -6,6 +6,8 @@ import com.vinspier.upload.model.BaseResult;
 import com.vinspier.upload.service.UploadService;
 import com.vinspier.upload.util.FileUtil;
 import com.vinspier.upload.util.ResultGenerator;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,7 @@ import java.util.UUID;
  * */
 @Controller
 @RequestMapping(value = "upload")
+@Api(value = "/UploadController", tags = "文件服务-vinspier")
 public class UploadController {
 
     @Autowired
@@ -39,9 +42,10 @@ public class UploadController {
      */
     @PostMapping("image")
     @ResponseBody
-    public String uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+    @ApiOperation(value = "图片上传")
+    public BaseResult uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
         String url = this.uploadService.uploadImage(file);
-        return JSONObject.toJSONString(ResultGenerator.genSuccess(url));
+        return ResultGenerator.genSuccess(url);
     }
 
     /**
@@ -52,9 +56,10 @@ public class UploadController {
      */
     @PostMapping("audio")
     @ResponseBody
-    public String  uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
+    @ApiOperation(value = "音频上传")
+    public BaseResult uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
         String url = this.uploadService.uploadAudio(file);
-        return JSONObject.toJSONString(ResultGenerator.genSuccess(url));
+        return ResultGenerator.genSuccess(url);
     }
 
     /**
@@ -62,6 +67,7 @@ public class UploadController {
      * */
     @GetMapping("download")
     @ResponseBody
+    @ApiOperation(value = "文件下载 组名 + 路径")
     public void download(String group, String path, HttpServletResponse response){
         byte[] fileByte = uploadService.download(group,path);
         FileUtil.downloadFileByEncode_gb2312(response,fileByte,"test-fileName" + UUID.randomUUID().toString());
