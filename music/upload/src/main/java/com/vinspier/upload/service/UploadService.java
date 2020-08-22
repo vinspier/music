@@ -1,7 +1,9 @@
 package com.vinspier.upload.service;
 
+import com.vinspier.upload.model.domain.UploadFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface UploadService {
@@ -15,23 +17,18 @@ public interface UploadService {
      * fastDFS客户端上传到fastFDS服务器
      * 返回全路径
      * */
-    String uploadImage(MultipartFile file);
+    UploadFile uploadImage(MultipartFile file);
 
     /**
      * 上传音频文件
      * 返回全路径
      * */
-    String uploadAudio(MultipartFile file);
+    UploadFile uploadAudio(MultipartFile file);
 
     /**
      * fastDFS客户端上传到fastFDS服务器
      * 返回全路径 生成缩略图
      * */
     String uploadFastThumb(MultipartFile file) throws IOException;
-
-    /**
-     * 下载文件
-     * */
-    byte[] download(String group,String path);
 
 }

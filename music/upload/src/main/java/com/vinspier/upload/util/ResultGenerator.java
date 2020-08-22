@@ -1,7 +1,7 @@
 package com.vinspier.upload.util;
 
 import com.vinspier.upload.enums.ResultCode;
-import com.vinspier.upload.model.BaseResult;
+import com.vinspier.upload.model.base.BaseResult;
 
 /**
 * @description: 生成模板返回数据模型

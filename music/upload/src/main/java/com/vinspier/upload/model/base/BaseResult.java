@@ -1,4 +1,4 @@
-package com.vinspier.upload.model;
+package com.vinspier.upload.model.base;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

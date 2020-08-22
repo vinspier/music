@@ -6,20 +6,18 @@ import com.vinspier.upload.config.UploadProperties;
 import com.vinspier.upload.enums.ContentType;
 import com.vinspier.upload.enums.ResultCode;
 import com.vinspier.upload.exception.CustomizeException;
+import com.vinspier.upload.model.domain.UploadFile;
+import com.vinspier.upload.service.IUploadFileService;
 import com.vinspier.upload.service.UploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -40,7 +38,12 @@ public class UploadServiceImpl implements UploadService {
     @Autowired
     private UploadProperties uploadProperties;
 
+    @Autowired
+    private IUploadFileService uploadFileService;
+
+
     @Override
+    @Transactional
     public String upload(MultipartFile file){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         validateFile(file, ContentType.IMAGE.getContentType(),IMAGINE_TYPES);
@@ -61,47 +64,41 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public String uploadImage(MultipartFile file){
+    @Transactional
+    public UploadFile uploadImage(MultipartFile file){
         validateFile(file,ContentType.IMAGE.getContentType(),IMAGINE_TYPES);
-        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        StorePath storePath;
         try {
-            storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+            String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            // 上传至 FastFDS 文件服务器
+            StorePath storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+            return uploadFileService.saveUpload(file,storePath,ext);
         } catch (IOException e) {
             LOGGER.info("文件上传至服务器失败：{}", file.getOriginalFilename());
             throw new CustomizeException(ResultCode.UPLOAD_FAILED);
         }
-        // 生成url地址，返回
-        return uploadProperties.getServerPath() + storePath.getFullPath();
     }
 
     @Override
-    public String uploadAudio(MultipartFile file){
+    @Transactional
+    public UploadFile uploadAudio(MultipartFile file){
         validateFile(file,ContentType.AUDIO.getContentType(),AUDIO_TYPES);
-        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        StorePath storePath;
         try {
-            storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+            String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+            StorePath storePath = this.storageClient.uploadFile(file.getInputStream(), file.getSize(), ext, null);
+            return uploadFileService.saveUpload(file,storePath,ext);
         } catch (IOException e) {
             LOGGER.info("文件上传至服务器失败：{}", file.getOriginalFilename());
             throw new CustomizeException(ResultCode.UPLOAD_FAILED);
         }
-        // 生成url地址，返回
-        return uploadProperties.getServerPath() + storePath.getFullPath();
     }
 
     @Override
+    @Transactional
     public String uploadFastThumb(MultipartFile file) throws IOException{
         validateFile(file,ContentType.IMAGE.getContentType(),IMAGINE_TYPES);
         String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         StorePath storePath = this.storageClient.uploadImageAndCrtThumbImage(file.getInputStream(), file.getSize(), ext, null);
         return uploadProperties.getServerPath() + storePath.getFullPath();
-    }
-
-    @Override
-    public byte[] download(String group, String path) {
-        byte[] fileByte = this.storageClient.downloadFile(group,path,(InputStream is) -> is.readAllBytes());
-        return fileByte;
     }
 
     /**
@@ -123,4 +120,5 @@ public class UploadServiceImpl implements UploadService {
             throw new CustomizeException(ResultCode.FILE_EMPTY);
         }
     }
+
 }

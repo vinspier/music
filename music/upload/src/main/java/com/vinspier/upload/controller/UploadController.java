@@ -1,20 +1,22 @@
 package com.vinspier.upload.controller;
 
 
-import com.alibaba.fastjson.JSONObject;
-import com.vinspier.upload.model.BaseResult;
+import com.vinspier.upload.model.base.BaseResult;
+import com.vinspier.upload.model.vo.UploadFileVo;
 import com.vinspier.upload.service.UploadService;
 import com.vinspier.upload.util.FileUtil;
 import com.vinspier.upload.util.ResultGenerator;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -29,7 +31,7 @@ import java.util.UUID;
  * */
 @Controller
 @RequestMapping(value = "upload")
-@Api(value = "/UploadController", tags = "文件服务-vinspier")
+@Api(value = "/UploadController", tags = "文件上传服务 - vinspier")
 public class UploadController {
 
     @Autowired
@@ -43,9 +45,10 @@ public class UploadController {
     @PostMapping("image")
     @ResponseBody
     @ApiOperation(value = "图片上传")
-    public BaseResult uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = this.uploadService.uploadImage(file);
-        return ResultGenerator.genSuccess(url);
+    public BaseResult<UploadFileVo> uploadImage(@RequestParam("file") MultipartFile file){
+        UploadFileVo uploadFileVo = new UploadFileVo();
+        BeanUtils.copyProperties(uploadService.uploadImage(file),uploadFileVo);
+        return ResultGenerator.genSuccess(uploadFileVo);
     }
 
     /**
@@ -57,20 +60,10 @@ public class UploadController {
     @PostMapping("audio")
     @ResponseBody
     @ApiOperation(value = "音频上传")
-    public BaseResult uploadAudio(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = this.uploadService.uploadAudio(file);
-        return ResultGenerator.genSuccess(url);
-    }
-
-    /**
-     * 下载文件
-     * */
-    @GetMapping("download")
-    @ResponseBody
-    @ApiOperation(value = "文件下载 组名 + 路径")
-    public void download(String group, String path, HttpServletResponse response){
-        byte[] fileByte = uploadService.download(group,path);
-        FileUtil.downloadFileByEncode_gb2312(response,fileByte,"test-fileName" + UUID.randomUUID().toString());
+    public BaseResult<UploadFileVo> uploadAudio(@RequestParam("file") MultipartFile file){
+        UploadFileVo uploadFileVo = new UploadFileVo();
+        BeanUtils.copyProperties(uploadService.uploadAudio(file),uploadFileVo);
+        return ResultGenerator.genSuccess(uploadFileVo);
     }
 
 }
