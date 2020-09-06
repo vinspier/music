@@ -14,6 +14,16 @@ spring:
     username: root
     password: root
 
+# Logging
+logging:
+  level: warn,info,error
+  path: /PersonalProject/logs/
+  file: ${spring.application.name}.log
+  pattern:
+    file: %d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n
+    console: %d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n
+
+
 # Eureka
 eureka:
   client:
