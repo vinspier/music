@@ -1,6 +1,7 @@
 package com.vinspier.upload.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.tobato.fastdfs.proto.storage.DownloadByteArray;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import com.vinspier.upload.enums.ResultCode;
 import com.vinspier.upload.exception.CustomizeException;
@@ -43,7 +44,7 @@ public class DownloadServiceImpl implements DownloadService {
             throw new CustomizeException(ResultCode.FILE_NOT_EXISTED);
         }
         // FastFDS 下载源文件
-        byte[] fileByte = this.storageClient.downloadFile(uploadFile.getGroupName(),uploadFile.getServerPath(),(InputStream is) -> is.readAllBytes());
+        byte[] fileByte = this.storageClient.downloadFile(uploadFile.getGroupName(),uploadFile.getServerPath(),new DownloadByteArray());
         //返回 文件流 至 客户端
         FileUtil.downloadFileByEncode_gb2312(response,fileByte,uploadFile.getOriginalFileName());
         return fileByte;
@@ -51,7 +52,7 @@ public class DownloadServiceImpl implements DownloadService {
 
     @Override
     public byte[] download(String group, String path) {
-        byte[] fileByte = this.storageClient.downloadFile(group,path,(InputStream is) -> is.readAllBytes());
+        byte[] fileByte = this.storageClient.downloadFile(group,path,new DownloadByteArray());
         return fileByte;
     }
 
